@@ -1,6 +1,7 @@
 ﻿using Firebase.Database;
 using Firebase.Database.Offline;
 using Firebase.Database.Query;
+using KeyManagment.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,106 +9,46 @@ using System.Threading.Tasks;
 
 namespace KeyManagment.Services
 {
-    public class FirebaseDataStore<T> : IDataStore<T>
-        where T : class
+    public class FirebaseDataStore
     {
         private const string BaseUrl = "https://keymanagement-7be4d.firebaseio.com";
 
-        private readonly ChildQuery _query;
+        private readonly FirebaseClient _query;
 
-        public FirebaseDataStore(/*FirebaseAuthService authService, */ string path)
+        public FirebaseDataStore()
         {
-            /* try to tailor out the options
-            FirebaseOptions options = new FirebaseOptions()
-            {
-                AuthTokenAsyncFactory = async () => await authService.GetFirebaseAuthToken()
-            };
-            */
-
-            _query = new FirebaseClient(BaseUrl/*, options*/).Child(path);
+            _query = new FirebaseClient(BaseUrl);
         }
 
-        public async Task<bool> AddItemAsync(T item)
+        public async Task<Item> GetItemNode()
         {
             try
             {
-                await _query
-                    .PostAsync(item);
-            }
-            catch(Exception ex)
-            {
-                return false;
-            }
+                Console.WriteLine("tmp {0}", "i get hier");
+                var tmplist = await GetItems();
+                await _query.Child("Notes").OnceAsync<Item>();
+                Console.WriteLine("tmp {0}", "it is suck");
+                return tmplist.Where(a => a.NameofApplication == "irgendwas").FirstOrDefault();
+                //return tmplist.FindIndex;
+                //return new Item { NameofApplication = "dd", PW = "bb", Date = "f" };
 
-            return true;
-        }
-
-        public async Task<bool> UpdateItemAsync(string datatime, T item)
-        {
-            try
-            {
-                await _query
-                    .Child("Date/").PutAsync(item);
-            }
-            catch(Exception ex)
-            {
-                return false;
-            }
-
-            return true;
-        }
-
-        public async Task<bool> DeleteItemAsync(string id)
-        {
-            try
-            {
-                await _query
-                    .Child(id)
-                    .DeleteAsync();
-            }
-            catch(Exception ex)
-            {
-                return false;
-            }
-
-            return true;
-        }
-
-        public async Task<T> GetItemAsync(string id)
-        {
-            try
-            {
-                return await _query
-                    .Child(id)
-                    .OnceSingleAsync<T>();
-            }
-            catch(Exception ex)
-            {
-                return null;
-            }
-        }
-
-        public async Task<T> GetItemNode()
-        {
-            try
-            {
-                return await _query.Child("Notes").OnceSingleAsync<T>();
             }
             catch (Exception ex)
             {
-                return null;
+                return new Item { NameofApplication = "gg",PW="bb",Date="cc"};
             }
         }
 
-        public async Task<IEnumerable<T>> GetItemsAsync(bool forceRefresh = false)
+        public async Task<List<Item>> GetItems()
         {
             try
             {
-                var firebaseObjects = await _query
-                    .OnceAsync<T>();
-
-                return firebaseObjects
-                    .Select(x => x.Object);
+                return (await _query.Child("Notes").OnceAsync<Item>()).Select(item => new Item
+                {
+                    NameofApplication = item.Object.NameofApplication,
+                    PW = item.Object.PW,
+                    Date = item.Object.Date
+                }).ToList();
             }
             catch(Exception ex)
             {
@@ -116,3 +57,4 @@ namespace KeyManagment.Services
         }
     }
 }
+

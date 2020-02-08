@@ -6,8 +6,7 @@
              mc:Ignorable="d"
              x:Class="KeyManagment.Views.MainPage">
     <ContentPage.ToolbarItems>
-        <ToolbarItem Text="+"
-                     Clicked="OnNoteAddedClicked" />
+        <ToolbarItem Text="+" />
     </ContentPage.ToolbarItems>
     <StackLayout Margin="20" x:Name="NoteViewStackLayout">
         <ListView x:Name="ListView"
