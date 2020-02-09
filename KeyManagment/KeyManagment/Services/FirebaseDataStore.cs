@@ -39,6 +39,30 @@ namespace KeyManagment.Services
             }
         }
 
+        public async Task<Item> TestFunc()
+        {
+            try
+            {
+                var tmplist = await _query.Child("Notes").Child("irgendwaskey").OnceAsync<string>();
+                await _query.Child("Notes").Child("irgendwaskey").OnceAsync<String>();
+                Console.WriteLine("object find {0}", tmplist.Count);
+                if (tmplist != null)
+                {
+                    foreach (FirebaseObject<string> thing in tmplist)
+                    { Console.WriteLine("hello {0}: {1}", thing.Object, thing.Key.ToString()); }
+                }
+                else { Console.WriteLine("this list is empty"); }
+
+
+                return new Item { NameofApplication = "dd", PW = "bb", Date = "f" };
+
+            }
+            catch (Exception ex)
+            {
+                return new Item { NameofApplication = "gg", PW = "bb", Date = "cc" };
+            }
+        }
+
         public async Task<List<Item>> GetItems()
         {
             try

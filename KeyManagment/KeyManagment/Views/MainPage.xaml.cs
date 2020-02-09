@@ -47,12 +47,9 @@ namespace KeyManagment.Views
 
         public async void OnListViewItemSelected(object sender, SelectedItemChangedEventArgs args)
         {
-                Console.WriteLine("tmp {0}", "I was called");
-                var tmp = await RealTimeDatabase.GetItemNode();
+            var tmp = await RealTimeDatabase.TestFunc();
             if (tmp != null)
             { Console.WriteLine("tmp {0}", tmp.NameofApplication); }
-            
-                //callednotyetfinished = true;
         }
 
     }
