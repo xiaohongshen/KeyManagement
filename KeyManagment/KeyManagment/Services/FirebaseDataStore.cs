@@ -42,12 +42,17 @@ namespace KeyManagment.Services
             return true;
         }
 
-        public async Task<bool> UpdateItemAsync(string datatime, T item)
+        public async Task<bool> UpdateItemAsync(T tobechangeditem, T updatedata)
         {
             try
             {
+                // await _query.Child("Notes").PutAsync(item);
+                var toUpdatePerson = (await _query
+                    .OnceAsync<T>()).Where(a => a.Object.Equals(tobechangeditem)).FirstOrDefault();
+
                 await _query
-                    .Child("Date/").PutAsync(item);
+                    .Child(toUpdatePerson.Key)
+                  .PutAsync(updatedata);
             }
             catch(Exception ex)
             {
@@ -107,7 +112,7 @@ namespace KeyManagment.Services
                     .OnceAsync<T>();
 
                 return firebaseObjects
-                    .Select(x => x.Object);
+                    .Select(x => x.Object) ;
             }
             catch(Exception ex)
             {

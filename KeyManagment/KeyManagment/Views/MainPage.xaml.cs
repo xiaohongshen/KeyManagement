@@ -36,7 +36,7 @@ namespace KeyManagment.Views
         {
             InitializeComponent();
             RealTimeDatabase = new FirebaseDataStore<Item>("Notes");
-            ApplicationDatabasse = new List<Item>(RealTimeDatabase.GetItemsAsync(true).Result.ToList());
+            ApplicationDatabasse = RealTimeDatabase.GetItemsAsync(true).Result.ToList();
         }
 
         protected override void OnAppearing()
@@ -50,52 +50,36 @@ namespace KeyManagment.Views
            
         }
        
-        async void OnSaveClick(object sender, EventArgs e, Item selecteditem)
+        public async void OnSaveClick(object sender, EventArgs e, Item selecteditem)
         {
             Debug.WriteLine("called onsave click");
             
             LeftButton.Clicked -= ButtonEvent;
 
-            if (await RealTimeDatabase.AddItemAsync(selecteditem))
+            if ((((Entry4PW1.Text).Equals(Entry4PW2.Text)) && Entry4PW1.Text != null) &&
+                   Entry4Application.Text != null /*&& ToBeChangedApplication != null*/ &&
+                   (!((Entry4Application.Text).Equals("ThisApplication")))||true)
             {
-                await DisplayAlert("Alert", "The Key update is done", "OK");
+                Item tobechangeditem = new Item();
+                tobechangeditem.NameofApplication = Entry4Application.Text;
+                tobechangeditem.PW = Entry4PW1.Text;//AESKEY.EncryptStringToBytes_Aes(Entry4PW1.Text);
+                tobechangeditem.Date = DateTime.UtcNow.ToString();
+                _ = await RealTimeDatabase.UpdateItemAsync(selecteditem, tobechangeditem);
             }
             else
-            { await DisplayAlert("Alert", "The Key update is not", "OK"); }
-
-
-            //if ((((Entry4PW1.Text).Equals(Entry4PW2.Text)) && Entry4PW1.Text != null) &&
-            //       Entry4Application.Text != null && selecteditem != null &&
-            //       (!((Entry4Application.Text).Equals("ThisApplication"))))
-            //{
-            //    Item itementry = new Item();
-            //    itementry.NameofApplication = Entry4Application.Text;
-            //    itementry.PW = Entry4PW1.Text;//AESKEY.EncryptStringToBytes_Aes(Entry4PW1.Text);
-            //    itementry.Date = DateTime.Now.ToString();
-            //    if ((await RealTimeDatabase.UpdateItemAsync(selecteditem.Date, itementry)))
-            //    {
-            //        await DisplayAlert("Alert", "The Key update is done", "OK");
-            //    }
-            //    else
-            //    {
-            //        await DisplayAlert("Alert", "The Key update is failed", "OK");
-            //    }
-            //}
-            //else
-            //{
-            //    await DisplayAlert("Alert", "The Key update is failed", "OK");
-            //    InfoLabel.TextColor = Color.Red;
-            //    InfoLabel.Text = "It seems something is wrong \n" +
-            //                      "\n" +
-            //                     "1. Is the application name ThisApplication? \n" +
-            //                     "\n" +
-            //                     "2. pease be sure the both passwards are identical \n";
-            //}
+            {
+                InfoLabel.TextColor = Color.Red;
+                InfoLabel.Text = "It seems something is wrong \n" +
+                                  "\n" +
+                                 "1. Is the application name ThisApplication? \n" +
+                                 "\n" +
+                                 "2. pease be sure the both passwards are identical \n";
+            }
         }
         
-        void OnEditClick(object sender, EventArgs e, Item selecteditme)
+        public void OnEditClick(object sender, EventArgs e, Item selecteditme)
         {
-            Debug.WriteLine("called onedit click");
+  
             Label labelapplication = FindByName("Label4Application") as Label;
             
             LeftButton.Clicked -= ButtonEvent;
@@ -134,9 +118,9 @@ namespace KeyManagment.Views
 
         }
 
-        void OnListViewItemSelected(object sender, SelectedItemChangedEventArgs args)
+        public void OnListViewItemSelected(object sender, SelectedItemChangedEventArgs args)
         {
-           if (args.SelectedItem != null && false)
+           if (args.SelectedItem != null)
             {
                 Item selecteditme = args.SelectedItem as Item;
 
@@ -164,33 +148,7 @@ namespace KeyManagment.Views
 
                 InfoLabel.Text = "Now you can modify the name and password of the related application";
             }
-
-            Console.WriteLine("ich habe keine ahnung balbbaa");
         }
-
-        /* try to event handler and event raise as discript in microsofot c# 
-         * unsuccessful. 
-         * */
-        //protected virtual void OnItemInTreat(ItemInTreatEventArgs e)
-        //{
-        //    EventHandler<ItemInTreatEventArgs> handler = ItemInTreat;
-        //    if (handler != null)
-        //    {
-        //        handler(this, e);
-        //    }
-        //}
-
-        //public static event EventHandler<ItemInTreatEventArgs> ItemInTreat;
         
     }
-    
-    //public class ItemInTreatEventArgs : EventArgs
-    //{
-    //    public Item ItemArgs { get; set; }
-    //    public ItemInTreatEventArgs(Item item)
-    //    {
-    //        this.ItemArgs = item;
-    //    }
-
-    //}
 }

@@ -12,5 +12,10 @@ namespace KeyManagment.Models
         public string PW { get; set; }
 
         public string Date { get; set; }
+
+        public override bool Equals(Object obj)
+        {
+            return (obj is Item) && ((Item)obj).Date == Date;
+        }
     }
 }
