@@ -19,46 +19,55 @@ namespace KeyManagment.Views
     //[DesignTimeVisible(false)]
     public partial class MainPage : ContentPage
     {
-        private static Entry Entry4Application;
-        private static Label Label4Application;
-        private static Entry Entry4PW1;
-        private static Label Label4PW1;
-        private static Entry Entry4PW2;
-        private static Button LeftButton;
-        private static Button RightButton;
-        private static EventHandler ButtonEvent;
+
 
         public static FirebaseDataStore<Item> RealTimeDatabase { get; set; }
         public static List<Item> ApplicationDatabasse { get; set; }
+        public static PageElement MainPageElement { get; set; }
 
 
         public MainPage()
         {
             InitializeComponent();
             RealTimeDatabase = new FirebaseDataStore<Item>("Notes");
+            ItemList = new ListView
+            {
+                Margin = 20,
+                ItemTemplate = new DataTemplate(() =>
+                {
+                    var textcell = new TextCell();
+                    textcell.SetBinding(TextCell.TextProperty, new Binding("NameofApplication"));
+                    textcell.SetBinding(TextCell.DetailProperty, new Binding("PW"));
+                    // textcell.BindingContext = new { Text = "", Detail = "PW" };
+                    return textcell;
+                })
+
+            };
+            ItemList.ItemSelected += OnListViewItemSelected;
+            NoteViewStackLayout.Children.Insert(0, ItemList);
             ApplicationDatabasse = RealTimeDatabase.GetItemsAsync(true).Result.ToList();
         }
 
         protected override void OnAppearing()
         {
             base.OnAppearing();
-            ListView.ItemsSource = ApplicationDatabasse; 
+            ItemList.ItemsSource = ApplicationDatabasse;
         }
-        
+
         void OnGoBackClick(object sender, EventArgs e)
         {
-           
+
         }
-       
+
         public async void OnSaveClick(object sender, EventArgs e, Item selecteditem)
         {
             Debug.WriteLine("called onsave click");
-            
+
             LeftButton.Clicked -= ButtonEvent;
 
             if ((((Entry4PW1.Text).Equals(Entry4PW2.Text)) && Entry4PW1.Text != null) &&
                    Entry4Application.Text != null /*&& ToBeChangedApplication != null*/ &&
-                   (!((Entry4Application.Text).Equals("ThisApplication")))||true)
+                   (!((Entry4Application.Text).Equals("ThisApplication"))))
             {
                 Item tobechangeditem = new Item();
                 tobechangeditem.NameofApplication = Entry4Application.Text;
@@ -76,14 +85,13 @@ namespace KeyManagment.Views
                                  "2. pease be sure the both passwards are identical \n";
             }
         }
-        
+
         public void OnEditClick(object sender, EventArgs e, Item selecteditme)
         {
-  
+
             Label labelapplication = FindByName("Label4Application") as Label;
-            
+
             LeftButton.Clicked -= ButtonEvent;
-            //FindClicked.
             Entry4Application = new Entry
             {
                 Text = Label4Application.Text,
@@ -114,14 +122,16 @@ namespace KeyManagment.Views
 
         void OnNoteAddedClicked(object sender, EventArgs e)
         {
-            
+
 
         }
 
         public void OnListViewItemSelected(object sender, SelectedItemChangedEventArgs args)
         {
-           if (args.SelectedItem != null)
+            Debug.WriteLine("called onseelected click");
+            if (args.SelectedItem != null)
             {
+                ItemList.ItemSelected -= OnListViewItemSelected;
                 Item selecteditme = args.SelectedItem as Item;
 
                 Label4Application = new Label
@@ -139,8 +149,9 @@ namespace KeyManagment.Views
                 ButtonEvent = (sender, args) => { OnEditClick(sender, args, selecteditme); };
 
                 LeftButton.Clicked += ButtonEvent;
+                RightButton.Clicked += RetrunListView;
 
-                NoteViewStackLayout.Children.Remove(FindByName("ListView") as ListView);
+                NoteViewStackLayout.Children.Remove(ItemList);
                 NoteViewStackLayout.Children.Insert(0, Label4Application);
                 NoteViewStackLayout.Children.Insert(1, Label4PW1);
                 NoteViewStackLayout.Children.Insert(2, LeftButton);
@@ -149,6 +160,54 @@ namespace KeyManagment.Views
                 InfoLabel.Text = "Now you can modify the name and password of the related application";
             }
         }
-        
+
+        public void RetrunListView(object sender, EventArgs e)
+        {
+            NoteViewStackLayout.Children.Clear();
+            ClearnUIElement();
+            ItemList = new ListView
+            {
+                Margin = 20,
+                ItemTemplate = new DataTemplate(() =>
+                {
+                    var textcell = new TextCell();
+                    textcell.SetBinding(TextCell.TextProperty, new Binding("NameofApplication"));
+                    textcell.SetBinding(TextCell.DetailProperty, new Binding("PW"));
+                    // textcell.BindingContext = new { Text = "", Detail = "PW" };
+                    return textcell;
+                })
+
+            };
+            ItemList.ItemsSource = ApplicationDatabasse;
+            ItemList.ItemSelected += OnListViewItemSelected;           
+            NoteViewStackLayout.Children.Insert(0, ItemList);            
+        }
+
+        private void ClearnUIElement()
+        {
+            Entry4Application = null;
+            Label4Application = null; 
+            Entry4PW1 = null;
+            Label4PW1 = null;
+            Entry4PW2 = null;
+            LeftButton = null;
+            RightButton = null;
+            ButtonEvent = null;
+            ItemList = null;
+        }
+    }
+
+    public class PageElement
+    {
+        private static Entry Entry4Application;
+        private static Label Label4Application;
+        private static Entry Entry4PW1;
+        private static Label Label4PW1;
+        private static Entry Entry4PW2;
+        private static Button LeftButton;
+        private static Button RightButton;
+        private static EventHandler ButtonEvent;
+        private static ListView ItemList;
+
     }
 }
