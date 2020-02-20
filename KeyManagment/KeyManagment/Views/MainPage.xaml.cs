@@ -23,7 +23,16 @@ namespace KeyManagment.Views
 
         public static FirebaseDataStore<Item> RealTimeDatabase { get; set; }
         public static List<Item> ApplicationDatabasse { get; set; }
-        public static PageElement MainPageElement { get; set; }
+
+        private static Entry Entry4Application;
+        private static Label Label4Application;
+        private static Entry Entry4PW1;
+        private static Label Label4PW1;
+        private static Entry Entry4PW2;
+        private static Button LeftButton;
+        private static Button RightButton;
+        private static EventHandler ButtonEvent;
+        private static ListView ItemList;
 
 
         public MainPage()
@@ -73,7 +82,8 @@ namespace KeyManagment.Views
                 tobechangeditem.NameofApplication = Entry4Application.Text;
                 tobechangeditem.PW = Entry4PW1.Text;//AESKEY.EncryptStringToBytes_Aes(Entry4PW1.Text);
                 tobechangeditem.Date = DateTime.UtcNow.ToString();
-                _ = await RealTimeDatabase.UpdateItemAsync(selecteditem, tobechangeditem);
+                bool updateresult;
+                updateresult = await RealTimeDatabase.UpdateItemAsync(selecteditem, tobechangeditem);
             }
             else
             {
@@ -173,7 +183,6 @@ namespace KeyManagment.Views
                     var textcell = new TextCell();
                     textcell.SetBinding(TextCell.TextProperty, new Binding("NameofApplication"));
                     textcell.SetBinding(TextCell.DetailProperty, new Binding("PW"));
-                    // textcell.BindingContext = new { Text = "", Detail = "PW" };
                     return textcell;
                 })
 
@@ -197,17 +206,4 @@ namespace KeyManagment.Views
         }
     }
 
-    public class PageElement
-    {
-        private static Entry Entry4Application;
-        private static Label Label4Application;
-        private static Entry Entry4PW1;
-        private static Label Label4PW1;
-        private static Entry Entry4PW2;
-        private static Button LeftButton;
-        private static Button RightButton;
-        private static EventHandler ButtonEvent;
-        private static ListView ItemList;
-
-    }
 }
