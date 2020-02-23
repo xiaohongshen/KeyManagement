@@ -13,10 +13,6 @@ namespace KeyManagment
         public App()
         {
             InitializeComponent();
-            //DataStoreContainer = new DataStoreContainer(new FirebaseAuthService());
-            //Item firstone = new Item { NameofApplication = "tmp", PW = "pasword", Date = DateTime.Now.ToString() };
-            
-            
             MainPage = new MainPage();
         }
 

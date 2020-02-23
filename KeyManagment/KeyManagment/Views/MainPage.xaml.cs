@@ -20,10 +20,57 @@ namespace KeyManagment.Views
     public partial class MainPage : ContentPage
     {
 
+        private static MainPageELement MainPageELement { get; set; }
+        private static DataOperation DataOperation { get; set; }
 
-        public static FirebaseDataStore<Item> RealTimeDatabase { get; set; }
-        public static List<Item> ApplicationDatabasse { get; set; }
 
+        public MainPage()
+        {
+            InitializeComponent();
+            MainPageELement = new MainPageELement();
+            DataOperation = new DataOperation();
+        }
+
+        protected override void OnAppearing()
+        {
+            base.OnAppearing();
+           // MainPageELement.ListItemView();
+            //this.ToolbarItems.Add(MainPageELement.ToolbarAddButton);
+            /*ToolbarItem item = new ToolbarItem
+            {
+                Text = "Example Item",
+               // IconImageSource = ImageSource.FromFile("example_icon.png"),
+                Order = ToolbarItemOrder.Primary,
+                Priority = 0
+            };*/
+
+            // "this" refers to a Page object
+            //this.Content = MainPageELement.PageContain;
+            //MainPageToolbar.Add(item);
+            //this.ToolbarItems.Add( item);
+
+            //Content = MainPageELement.PageContain;
+            //MainPageContent.Children.Add( MainPageELement.PageContain);
+
+/*            Content = new StackLayout
+            {
+                Children =
+                {
+                    MainPageELement.InfoLabel,
+                }
+            };*/
+            //ToolbarItems.Add(item);
+        }
+
+
+
+
+
+
+    }
+
+    internal class MainPageELement
+    {
         private static Entry Entry4Application;
         private static Label Label4Application;
         private static Entry Entry4PW1;
@@ -33,46 +80,129 @@ namespace KeyManagment.Views
         private static Button RightButton;
         private static EventHandler ButtonEvent;
         private static ListView ItemList;
+        public static Label InfoLabel;
+        public static ToolbarItem ToolbarAddButton { get; set; }
+        public static StackLayout PageContain;
 
 
-        public MainPage()
+        public MainPageELement()
         {
-            InitializeComponent();
-            RealTimeDatabase = new FirebaseDataStore<Item>("Notes");
-            ItemList = new ListView
+            ItemList = new ListView();
+            Entry4Application = new Entry();
+            Label4Application = new Label();
+            Label4PW1 = new Label();
+            Entry4PW1 = new Entry();
+            Entry4PW2 = new Entry();
+            LeftButton = new Button();
+            RightButton = new Button();
+            InfoLabel = new Label();
+            PageContain = new StackLayout();
+            ToolbarAddButton = new ToolbarItem();
+            ToolbarAddButton.Text = "+";
+            ToolbarAddButton.Clicked += OnNoteAddedClicked;
+        }
+
+        private void OnNoteAddedClicked(object sender, EventArgs e)
+        {
+
+
+        }
+
+        public void ListItemView()
+        {        
+            ItemList.ItemTemplate = new DataTemplate(() =>
             {
-                Margin = 20,
-                ItemTemplate = new DataTemplate(() =>
-                {
-                    var textcell = new TextCell();
-                    textcell.SetBinding(TextCell.TextProperty, new Binding("NameofApplication"));
-                    textcell.SetBinding(TextCell.DetailProperty, new Binding("PW"));
-                    // textcell.BindingContext = new { Text = "", Detail = "PW" };
-                    return textcell;
-                })
-
-            };
+                var textcell = new TextCell();
+                textcell.SetBinding(TextCell.TextProperty, new Binding("NameofApplication"));
+                textcell.SetBinding(TextCell.DetailProperty, new Binding("PW"));
+                return textcell;
+            });
+            ItemList.ItemsSource = DataOperation.ApplicationDatabasse;
             ItemList.ItemSelected += OnListViewItemSelected;
-            NoteViewStackLayout.Children.Insert(0, ItemList);
-            ApplicationDatabasse = RealTimeDatabase.GetItemsAsync(true).Result.ToList();
+           
+            InfoLabel.Text = "schoen dich zu sehen";
+            PageContain.Children.Add(ItemList);
+            PageContain.Children.Add(InfoLabel);
+
         }
 
-        protected override void OnAppearing()
+        public void ItemView(Item item)
         {
-            base.OnAppearing();
-            ItemList.ItemsSource = ApplicationDatabasse;
+            PageContain.Children.Clear();
+
+            Label4Application.Text = item.NameofApplication;
+            Label4Application.HorizontalOptions = LayoutOptions.CenterAndExpand;
+
+            Label4PW1.Text = item.PW;
+            LeftButton.Text = "Edit";
+            LeftButton.Clicked += (sender, args) => { OnEditClick(sender, args, item); };
+
+            RightButton.Text = "GoBack";
+            RightButton.Clicked += RetrunListView;
+
+            InfoLabel.Text = "Now you can modify the name and password of the related application";
+
+            PageContain.Children.Add(Label4Application);
+            PageContain.Children.Add(Label4PW1);
+            PageContain.Children.Add(LeftButton);
+            PageContain.Children.Add(RightButton);
+            PageContain.Children.Add(InfoLabel);
+
         }
 
-        void OnGoBackClick(object sender, EventArgs e)
+        public void OnListViewItemSelected(object sender, SelectedItemChangedEventArgs args)
         {
-
+            Debug.WriteLine("called onseelected click");
+            if (args.SelectedItem != null)
+            {
+                ItemView(args.SelectedItem as Item);
+            }
         }
 
-        public async void OnSaveClick(object sender, EventArgs e, Item selecteditem)
+        public void OnEditClick(object sender, EventArgs e, Item selecteditme)
+        {
+            PageContain.Children.Clear();
+            Entry4Application.Text = selecteditme.NameofApplication;
+            Entry4PW1.Text = "";
+            Entry4PW2.Text = "";
+
+            LeftButton = null;
+            LeftButton.Text = "Save";
+            LeftButton.Clicked += (sender, args) => { OnSaveClick(sender, args, selecteditme); };
+
+            InfoLabel.Text = "Now you can modify the name and password of the related application";
+
+            PageContain.Children.Add(Entry4Application);
+            PageContain.Children.Add(Entry4PW1);
+            PageContain.Children.Add(Entry4PW2);
+            PageContain.Children.Add(LeftButton);
+            PageContain.Children.Add(RightButton);
+            PageContain.Children.Add(InfoLabel);
+        }
+
+        public void RetrunListView(object sender, EventArgs e)
+        {
+            PageContain.Children.Clear();
+            ClearnUIElement();
+            ListItemView();
+        }
+
+        private void ClearnUIElement()
+        {
+            Entry4Application = null;
+            Label4Application = null;
+            Entry4PW1 = null;
+            Label4PW1 = null;
+            Entry4PW2 = null;
+            LeftButton = null;
+            RightButton = null;
+            ButtonEvent = null;
+            ItemList = null;
+        }
+
+        private async void OnSaveClick(object sender, EventArgs e, Item selecteditem)
         {
             Debug.WriteLine("called onsave click");
-
-            LeftButton.Clicked -= ButtonEvent;
 
             if ((((Entry4PW1.Text).Equals(Entry4PW2.Text)) && Entry4PW1.Text != null) &&
                    Entry4Application.Text != null /*&& ToBeChangedApplication != null*/ &&
@@ -83,7 +213,7 @@ namespace KeyManagment.Views
                 tobechangeditem.PW = Entry4PW1.Text;//AESKEY.EncryptStringToBytes_Aes(Entry4PW1.Text);
                 tobechangeditem.Date = DateTime.UtcNow.ToString();
                 bool updateresult;
-                updateresult = await RealTimeDatabase.UpdateItemAsync(selecteditem, tobechangeditem);
+                updateresult = await DataOperation.RealTimeDatabase.UpdateItemAsync(selecteditem, tobechangeditem);
             }
             else
             {
@@ -96,114 +226,18 @@ namespace KeyManagment.Views
             }
         }
 
-        public void OnEditClick(object sender, EventArgs e, Item selecteditme)
-        {
 
-            Label labelapplication = FindByName("Label4Application") as Label;
-
-            LeftButton.Clicked -= ButtonEvent;
-            Entry4Application = new Entry
-            {
-                Text = Label4Application.Text,
-                HorizontalOptions = LayoutOptions.CenterAndExpand,
-
-            };
-
-            Entry4PW1 = new Entry
-            {
-
-            };
-
-            Entry4PW2 = new Entry
-            {
-
-            };
-            LeftButton.Text = "Save";
-            ButtonEvent = (sender, eventArgs) => { OnSaveClick(sender, eventArgs, selecteditme); };
-            LeftButton.Clicked += ButtonEvent;
-
-            NoteViewStackLayout.Children.Remove(Label4Application);
-            NoteViewStackLayout.Children.Remove(Label4PW1);
-            NoteViewStackLayout.Children.Insert(0, Entry4Application);
-            NoteViewStackLayout.Children.Insert(1, Entry4PW1);
-            NoteViewStackLayout.Children.Insert(2, Entry4PW2);
-
-        }
-
-        void OnNoteAddedClicked(object sender, EventArgs e)
-        {
-
-
-        }
-
-        public void OnListViewItemSelected(object sender, SelectedItemChangedEventArgs args)
-        {
-            Debug.WriteLine("called onseelected click");
-            if (args.SelectedItem != null)
-            {
-                ItemList.ItemSelected -= OnListViewItemSelected;
-                Item selecteditme = args.SelectedItem as Item;
-
-                Label4Application = new Label
-                {
-                    Text = selecteditme.NameofApplication,
-                    HorizontalOptions = LayoutOptions.CenterAndExpand,
-                };
-
-                Label4PW1 = new Label { Text = selecteditme.PW, };
-
-                LeftButton = new Button { Text = "Edit", };
-
-                RightButton = new Button { Text = "GoBack", };
-
-                ButtonEvent = (sender, args) => { OnEditClick(sender, args, selecteditme); };
-
-                LeftButton.Clicked += ButtonEvent;
-                RightButton.Clicked += RetrunListView;
-
-                NoteViewStackLayout.Children.Remove(ItemList);
-                NoteViewStackLayout.Children.Insert(0, Label4Application);
-                NoteViewStackLayout.Children.Insert(1, Label4PW1);
-                NoteViewStackLayout.Children.Insert(2, LeftButton);
-                NoteViewStackLayout.Children.Insert(3, RightButton);
-
-                InfoLabel.Text = "Now you can modify the name and password of the related application";
-            }
-        }
-
-        public void RetrunListView(object sender, EventArgs e)
-        {
-            NoteViewStackLayout.Children.Clear();
-            ClearnUIElement();
-            ItemList = new ListView
-            {
-                Margin = 20,
-                ItemTemplate = new DataTemplate(() =>
-                {
-                    var textcell = new TextCell();
-                    textcell.SetBinding(TextCell.TextProperty, new Binding("NameofApplication"));
-                    textcell.SetBinding(TextCell.DetailProperty, new Binding("PW"));
-                    return textcell;
-                })
-
-            };
-            ItemList.ItemsSource = ApplicationDatabasse;
-            ItemList.ItemSelected += OnListViewItemSelected;           
-            NoteViewStackLayout.Children.Insert(0, ItemList);            
-        }
-
-        private void ClearnUIElement()
-        {
-            Entry4Application = null;
-            Label4Application = null; 
-            Entry4PW1 = null;
-            Label4PW1 = null;
-            Entry4PW2 = null;
-            LeftButton = null;
-            RightButton = null;
-            ButtonEvent = null;
-            ItemList = null;
-        }
     }
 
-}
+    internal class DataOperation
+    {
+        public static FirebaseDataStore<Item> RealTimeDatabase { get; set; }
+        public static List<Item> ApplicationDatabasse { get; set; }
+
+        public DataOperation()
+        {
+            RealTimeDatabase = new FirebaseDataStore<Item>("Notes");
+            ApplicationDatabasse = RealTimeDatabase.GetItemsAsync(true).Result.ToList();
+        }
+    }
+}  

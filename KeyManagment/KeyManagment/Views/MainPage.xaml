@@ -7,10 +7,18 @@
              x:Class="KeyManagment.Views.MainPage">
     <ContentPage.ToolbarItems>
         <ToolbarItem Text="+"
-                     Clicked="OnNoteAddedClicked" />
+                      />
     </ContentPage.ToolbarItems>
     <StackLayout Margin="20" x:Name="NoteViewStackLayout">
-        
+        <ListView x:Name="ListView"
+              Margin="20">
+        <ListView.ItemTemplate>
+            <DataTemplate>
+                <TextCell Text ="{Binding NameofApplication}"                          
+                          Detail="{Binding PW}" />
+            </DataTemplate>
+        </ListView.ItemTemplate>
+        </ListView>
         <Label TextColor = "White"
                BackgroundColor = "Green"
                LineBreakMode = "WordWrap" x:Name="InfoLabel">
