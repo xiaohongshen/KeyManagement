@@ -34,32 +34,9 @@ namespace KeyManagment.Views
         protected override void OnAppearing()
         {
             base.OnAppearing();
-           // MainPageELement.ListItemView();
-            //this.ToolbarItems.Add(MainPageELement.ToolbarAddButton);
-            /*ToolbarItem item = new ToolbarItem
-            {
-                Text = "Example Item",
-               // IconImageSource = ImageSource.FromFile("example_icon.png"),
-                Order = ToolbarItemOrder.Primary,
-                Priority = 0
-            };*/
-
-            // "this" refers to a Page object
-            //this.Content = MainPageELement.PageContain;
-            //MainPageToolbar.Add(item);
-            //this.ToolbarItems.Add( item);
-
-            //Content = MainPageELement.PageContain;
-            //MainPageContent.Children.Add( MainPageELement.PageContain);
-
-/*            Content = new StackLayout
-            {
-                Children =
-                {
-                    MainPageELement.InfoLabel,
-                }
-            };*/
-            //ToolbarItems.Add(item);
+            MainPageELement.ListItemView();            
+            this.ToolbarItems.Add(MainPageELement.ToolbarAddButton);
+            Content = MainPageELement.PageContain;
         }
 
 
@@ -71,58 +48,49 @@ namespace KeyManagment.Views
 
     internal class MainPageELement
     {
-        private static Entry Entry4Application;
-        private static Label Label4Application;
-        private static Entry Entry4PW1;
-        private static Label Label4PW1;
-        private static Entry Entry4PW2;
-        private static Button LeftButton;
-        private static Button RightButton;
-        private static EventHandler ButtonEvent;
-        private static ListView ItemList;
-        public static Label InfoLabel;
         public static ToolbarItem ToolbarAddButton { get; set; }
         public static StackLayout PageContain;
+        private static EntryPW PWChanging;
+
+        public static string testpw;
 
 
         public MainPageELement()
         {
-            ItemList = new ListView();
-            Entry4Application = new Entry();
-            Label4Application = new Label();
-            Label4PW1 = new Label();
-            Entry4PW1 = new Entry();
-            Entry4PW2 = new Entry();
-            LeftButton = new Button();
-            RightButton = new Button();
-            InfoLabel = new Label();
             PageContain = new StackLayout();
-            ToolbarAddButton = new ToolbarItem();
-            ToolbarAddButton.Text = "+";
+            ToolbarAddButton = new ToolbarItem
+            {
+                Text = "++++++++",
+                Order = ToolbarItemOrder.Primary,
+                Priority = 0,
+                IconImageSource = ImageSource.FromFile("icon.png"),
+            };
             ToolbarAddButton.Clicked += OnNoteAddedClicked;
         }
 
         private void OnNoteAddedClicked(object sender, EventArgs e)
         {
-
+            
 
         }
 
         public void ListItemView()
-        {        
-            ItemList.ItemTemplate = new DataTemplate(() =>
+        {
+            ListView itemlist = new ListView
             {
-                var textcell = new TextCell();
-                textcell.SetBinding(TextCell.TextProperty, new Binding("NameofApplication"));
-                textcell.SetBinding(TextCell.DetailProperty, new Binding("PW"));
-                return textcell;
-            });
-            ItemList.ItemsSource = DataOperation.ApplicationDatabasse;
-            ItemList.ItemSelected += OnListViewItemSelected;
-           
-            InfoLabel.Text = "schoen dich zu sehen";
-            PageContain.Children.Add(ItemList);
-            PageContain.Children.Add(InfoLabel);
+                ItemTemplate = new DataTemplate(() =>
+                {
+                    var textcell = new TextCell();
+                    textcell.SetBinding(TextCell.TextProperty, new Binding("NameofApplication"));
+                    textcell.SetBinding(TextCell.DetailProperty, new Binding("PW"));
+                    return textcell;
+                })
+            };
+            itemlist.ItemSelected += OnListViewItemSelected;
+            itemlist.ItemsSource = DataOperation.ApplicationDatabasse;           
+            Label infolabel = new Label { Text = "schoen dich zu sehen" };
+            PageContain.Children.Add(itemlist);
+            PageContain.Children.Add(infolabel);
 
         }
 
@@ -130,23 +98,21 @@ namespace KeyManagment.Views
         {
             PageContain.Children.Clear();
 
-            Label4Application.Text = item.NameofApplication;
-            Label4Application.HorizontalOptions = LayoutOptions.CenterAndExpand;
+            Label label4name = new Label { Text = item.NameofApplication, HorizontalOptions = LayoutOptions.CenterAndExpand };
+            Label label4pw = new Label { Text = item.PW };
+            Button leftbutton = new Button { Text = "Edit" };
+            leftbutton.Clicked += (sender, args) => { OnEditClick(sender, args, item); };
 
-            Label4PW1.Text = item.PW;
-            LeftButton.Text = "Edit";
-            LeftButton.Clicked += (sender, args) => { OnEditClick(sender, args, item); };
+            Button rightbutton = new Button { Text = "GoBack" };
+            rightbutton.Clicked += (sender, args) => { RetrunListView(); };
 
-            RightButton.Text = "GoBack";
-            RightButton.Clicked += RetrunListView;
+            Label infolabe = new Label { Text = "Now you can modify the name and password of the related application" };
 
-            InfoLabel.Text = "Now you can modify the name and password of the related application";
-
-            PageContain.Children.Add(Label4Application);
-            PageContain.Children.Add(Label4PW1);
-            PageContain.Children.Add(LeftButton);
-            PageContain.Children.Add(RightButton);
-            PageContain.Children.Add(InfoLabel);
+            PageContain.Children.Add(label4name);
+            PageContain.Children.Add(label4pw);
+            PageContain.Children.Add(leftbutton);
+            PageContain.Children.Add(rightbutton);
+            PageContain.Children.Add(infolabe);
 
         }
 
@@ -162,67 +128,77 @@ namespace KeyManagment.Views
         public void OnEditClick(object sender, EventArgs e, Item selecteditme)
         {
             PageContain.Children.Clear();
-            Entry4Application.Text = selecteditme.NameofApplication;
-            Entry4PW1.Text = "";
-            Entry4PW2.Text = "";
 
-            LeftButton = null;
-            LeftButton.Text = "Save";
-            LeftButton.Clicked += (sender, args) => { OnSaveClick(sender, args, selecteditme); };
+            Entry entry4name = new Entry { Text = selecteditme.NameofApplication, HorizontalOptions = LayoutOptions.CenterAndExpand };
+            entry4name.BindingContext = PWChanging = new EntryPW();
+            entry4name.SetBinding(Entry.TextProperty, "PWChanging.InputedName",
+                                 mode: BindingMode.OneWayToSource);
 
-            InfoLabel.Text = "Now you can modify the name and password of the related application";
+            Entry entry4pw1 = new Entry();
+            entry4pw1.Text = "";
+            entry4pw1.BindingContext = PWChanging;
+            entry4pw1.SetBinding(Entry.TextProperty, "PWChanging.InputedPW1",
+                                 mode: BindingMode.OneWayToSource);
 
-            PageContain.Children.Add(Entry4Application);
-            PageContain.Children.Add(Entry4PW1);
-            PageContain.Children.Add(Entry4PW2);
-            PageContain.Children.Add(LeftButton);
-            PageContain.Children.Add(RightButton);
-            PageContain.Children.Add(InfoLabel);
+            Entry entry4pw2 = new Entry();
+            entry4pw2.Text = "";
+            entry4pw2.BindingContext = PWChanging;
+            entry4pw2.SetBinding(Entry.TextProperty, "PWChanging.InputedPW2",
+                                 mode: BindingMode.OneWayToSource); 
+
+            Button leftbutton = new Button { Text = "Save" };
+            leftbutton.Clicked += (sender, args) => { OnSaveClick(sender, args, selecteditme); };
+
+            Button rightbutton = new Button { Text = "GoBack" };
+            rightbutton.Clicked += (sender, args) => { RetrunListView(); };
+
+            Label infolabe = new Label { Text = "Now you can modify the name and password of the related application" };
+
+            PageContain.Children.Add(entry4name);
+            PageContain.Children.Add(entry4pw1);
+            PageContain.Children.Add(entry4pw2);
+            PageContain.Children.Add(leftbutton);
+            PageContain.Children.Add(rightbutton);
+            PageContain.Children.Add(infolabe);
         }
 
-        public void RetrunListView(object sender, EventArgs e)
+        public void RetrunListView()
         {
             PageContain.Children.Clear();
             ClearnUIElement();
+
             ListItemView();
         }
 
         private void ClearnUIElement()
         {
-            Entry4Application = null;
-            Label4Application = null;
-            Entry4PW1 = null;
-            Label4PW1 = null;
-            Entry4PW2 = null;
-            LeftButton = null;
-            RightButton = null;
-            ButtonEvent = null;
-            ItemList = null;
         }
 
         private async void OnSaveClick(object sender, EventArgs e, Item selecteditem)
         {
             Debug.WriteLine("called onsave click");
+            
 
-            if ((((Entry4PW1.Text).Equals(Entry4PW2.Text)) && Entry4PW1.Text != null) &&
-                   Entry4Application.Text != null /*&& ToBeChangedApplication != null*/ &&
-                   (!((Entry4Application.Text).Equals("ThisApplication"))))
+            if (PWChanging != null &&
+
+                (((PWChanging.InputedPW1).Equals(PWChanging.InputedPW2)) && PWChanging.InputedPW1 != null) &&
+                   PWChanging.InputedName != null /*&& ToBeChangedApplication != null*/ &&
+                   (!((PWChanging.InputedName).Equals("ThisApplication"))))
             {
                 Item tobechangeditem = new Item();
-                tobechangeditem.NameofApplication = Entry4Application.Text;
-                tobechangeditem.PW = Entry4PW1.Text;//AESKEY.EncryptStringToBytes_Aes(Entry4PW1.Text);
+                tobechangeditem.NameofApplication = PWChanging.InputedName;
+                tobechangeditem.PW = PWChanging.InputedPW1;//AESKEY.EncryptStringToBytes_Aes(Entry4PW1.Text);
                 tobechangeditem.Date = DateTime.UtcNow.ToString();
                 bool updateresult;
                 updateresult = await DataOperation.RealTimeDatabase.UpdateItemAsync(selecteditem, tobechangeditem);
+                if (updateresult)
+                {
+                    RetrunListView();
+                }
             }
             else
             {
-                InfoLabel.TextColor = Color.Red;
-                InfoLabel.Text = "It seems something is wrong \n" +
-                                  "\n" +
-                                 "1. Is the application name ThisApplication? \n" +
-                                 "\n" +
-                                 "2. pease be sure the both passwards are identical \n";
+
             }
         }
 
@@ -239,5 +215,19 @@ namespace KeyManagment.Views
             RealTimeDatabase = new FirebaseDataStore<Item>("Notes");
             ApplicationDatabasse = RealTimeDatabase.GetItemsAsync(true).Result.ToList();
         }
+
+        public void RefreshData ()
+        {
+            ApplicationDatabasse = RealTimeDatabase.GetItemsAsync(true).Result.ToList();
+        }
     }
+
+    internal class EntryPW
+    {
+        public string InputedName { get; set; }
+        public string InputedPW1 { get; set; }
+        public string InputedPW2 { get; set; }
+    }
+
+
 }  
