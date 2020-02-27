@@ -19,10 +19,8 @@ namespace KeyManagment.Views
     //[DesignTimeVisible(false)]
     public partial class MainPage : ContentPage
     {
-
         private static MainPageELement MainPageELement { get; set; }
         private static DataOperation DataOperation { get; set; }
-
 
         public MainPage()
         {
@@ -38,12 +36,6 @@ namespace KeyManagment.Views
             this.ToolbarItems.Add(MainPageELement.ToolbarAddButton);
             Content = MainPageELement.PageContain;
         }
-
-
-
-
-
-
     }
 
     internal class MainPageELement
@@ -51,9 +43,6 @@ namespace KeyManagment.Views
         public static ToolbarItem ToolbarAddButton { get; set; }
         public static StackLayout PageContain;
         private static EntryPW PWChanging;
-
-        public static string testpw;
-
 
         public MainPageELement()
         {
@@ -91,7 +80,6 @@ namespace KeyManagment.Views
             Label infolabel = new Label { Text = "schoen dich zu sehen" };
             PageContain.Children.Add(itemlist);
             PageContain.Children.Add(infolabel);
-
         }
 
         public void ItemView(Item item)
@@ -113,12 +101,10 @@ namespace KeyManagment.Views
             PageContain.Children.Add(leftbutton);
             PageContain.Children.Add(rightbutton);
             PageContain.Children.Add(infolabe);
-
         }
 
         public void OnListViewItemSelected(object sender, SelectedItemChangedEventArgs args)
         {
-            Debug.WriteLine("called onseelected click");
             if (args.SelectedItem != null)
             {
                 ItemView(args.SelectedItem as Item);
@@ -165,25 +151,17 @@ namespace KeyManagment.Views
         public void RetrunListView()
         {
             PageContain.Children.Clear();
-            ClearnUIElement();
-
             ListItemView();
-        }
-
-        private void ClearnUIElement()
-        {
         }
 
         private async void OnSaveClick(object sender, EventArgs e, Item selecteditem)
         {
-            Debug.WriteLine("called onsave click");
-            
-
             if (PWChanging != null &&
-
-                (((PWChanging.InputedPW1).Equals(PWChanging.InputedPW2)) && PWChanging.InputedPW1 != null) &&
-                   PWChanging.InputedName != null /*&& ToBeChangedApplication != null*/ &&
-                   (!((PWChanging.InputedName).Equals("ThisApplication"))))
+                (((PWChanging.InputedPW1).Equals(PWChanging.InputedPW2)) && 
+                PWChanging.InputedPW1 != null) &&
+                PWChanging.InputedName != null /*&& 
+                ToBeChangedApplication != null*/ &&
+                (!((PWChanging.InputedName).Equals("ThisApplication"))))
             {
                 Item tobechangeditem = new Item();
                 tobechangeditem.NameofApplication = PWChanging.InputedName;
@@ -201,8 +179,6 @@ namespace KeyManagment.Views
 
             }
         }
-
-
     }
 
     internal class DataOperation
@@ -224,9 +200,9 @@ namespace KeyManagment.Views
 
     internal class EntryPW
     {
-        public string InputedName { get; set; }
-        public string InputedPW1 { get; set; }
-        public string InputedPW2 { get; set; }
+        public string InputedName { get; set;}
+        public string InputedPW1 { get; set;}
+        public string InputedPW2 { get; set;}
     }
 
 
