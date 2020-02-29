@@ -19,52 +19,58 @@ namespace KeyManagment.Views
     //[DesignTimeVisible(false)]
     public partial class MainPage : ContentPage
     {
-        private static MainPageELement MainPageELement { get; set; }
-        private static DataOperation DataOperation { get; set; }
+        internal static ViewCreator MainPageElement { get ; set ; }
+        internal static DataOperation DataOperation { get ; set; }
+
 
         public MainPage()
         {
-            InitializeComponent();
-            MainPageELement = new MainPageELement();
+            InitializeComponent();            
+            MainPageElement = new ViewCreator();
             DataOperation = new DataOperation();
         }
 
         protected override void OnAppearing()
         {
             base.OnAppearing();
-            MainPageELement.ListItemView();            
-            this.ToolbarItems.Add(MainPageELement.ToolbarAddButton);
-            Content = MainPageELement.PageContain;
+            ViewCreator.CreateListItemView();
+            this.ToolbarItems.Add(ViewCreator.AddToolbarButton());
+            Content = ViewCreator.PageContain;
         }
     }
 
-    internal class MainPageELement
+    internal class ViewCreator
     {
         public static ToolbarItem ToolbarAddButton { get; set; }
-        public static StackLayout PageContain;
-        private static EntryPW PWChanging;
+        private static StackLayout _pagecontain;
+        public static StackLayout PageContain { get => _pagecontain; private set => _pagecontain = value; }
+        public static EntryPW PWChanging { get; set; }
 
-        public MainPageELement()
+        public ViewCreator()
         {
-            PageContain = new StackLayout();
-            ToolbarAddButton = new ToolbarItem
+            _pagecontain = new StackLayout();
+        }
+
+        public static ToolbarItem AddToolbarButton()
+        {
+            return (new ToolbarItem
             {
                 Text = "++++++++",
                 Order = ToolbarItemOrder.Primary,
                 Priority = 0,
-                IconImageSource = ImageSource.FromFile("icon.png"),
-            };
-            ToolbarAddButton.Clicked += OnNoteAddedClicked;
+                IconImageSource = ImageSource.FromFile("icon.png")
+            });
         }
 
-        private void OnNoteAddedClicked(object sender, EventArgs e)
+        private static void OnNoteAddedClicked(object sender, EventArgs e)
         {
             
 
-        }
+        }   
 
-        public void ListItemView()
+        public static void CreateListItemView()
         {
+            PageContain.Children.Clear();
             ListView itemlist = new ListView
             {
                 ItemTemplate = new DataTemplate(() =>
@@ -76,16 +82,15 @@ namespace KeyManagment.Views
                 })
             };
             itemlist.ItemSelected += OnListViewItemSelected;
-            itemlist.ItemsSource = DataOperation.ApplicationDatabasse;           
+            itemlist.ItemsSource = DataOperation.ApplicationDatabasse;
             Label infolabel = new Label { Text = "schoen dich zu sehen" };
-            PageContain.Children.Add(itemlist);
-            PageContain.Children.Add(infolabel);
+            _pagecontain.Children.Add(itemlist);
+            _pagecontain.Children.Add(infolabel);
         }
 
-        public void ItemView(Item item)
+        private static void CreateItemView(Item item)
         {
             PageContain.Children.Clear();
-
             Label label4name = new Label { Text = item.NameofApplication, HorizontalOptions = LayoutOptions.CenterAndExpand };
             Label label4pw = new Label { Text = item.PW };
             Button leftbutton = new Button { Text = "Edit" };
@@ -96,25 +101,24 @@ namespace KeyManagment.Views
 
             Label infolabe = new Label { Text = "Now you can modify the name and password of the related application" };
 
-            PageContain.Children.Add(label4name);
-            PageContain.Children.Add(label4pw);
-            PageContain.Children.Add(leftbutton);
-            PageContain.Children.Add(rightbutton);
-            PageContain.Children.Add(infolabe);
+            _pagecontain.Children.Add(label4name);
+            _pagecontain.Children.Add(label4pw);
+            _pagecontain.Children.Add(leftbutton);
+            _pagecontain.Children.Add(rightbutton);
+            _pagecontain.Children.Add(infolabe);
         }
 
-        public void OnListViewItemSelected(object sender, SelectedItemChangedEventArgs args)
+        private static void OnListViewItemSelected(object sender, SelectedItemChangedEventArgs args)
         {
             if (args.SelectedItem != null)
             {
-                ItemView(args.SelectedItem as Item);
+                CreateItemView(args.SelectedItem as Item);
             }
         }
 
-        public void OnEditClick(object sender, EventArgs e, Item selecteditme)
+        private static void OnEditClick(object sender, EventArgs e, Item selecteditme)
         {
             PageContain.Children.Clear();
-
             Entry entry4name = new Entry { Text = selecteditme.NameofApplication, HorizontalOptions = LayoutOptions.CenterAndExpand };
             entry4name.BindingContext = PWChanging = new EntryPW();
             entry4name.SetBinding(Entry.TextProperty, "PWChanging.InputedName",
@@ -140,21 +144,20 @@ namespace KeyManagment.Views
 
             Label infolabe = new Label { Text = "Now you can modify the name and password of the related application" };
 
-            PageContain.Children.Add(entry4name);
-            PageContain.Children.Add(entry4pw1);
-            PageContain.Children.Add(entry4pw2);
-            PageContain.Children.Add(leftbutton);
-            PageContain.Children.Add(rightbutton);
-            PageContain.Children.Add(infolabe);
+            _pagecontain.Children.Add(entry4name);
+            _pagecontain.Children.Add(entry4pw1);
+            _pagecontain.Children.Add(entry4pw2);
+            _pagecontain.Children.Add(leftbutton);
+            _pagecontain.Children.Add(rightbutton);
+            _pagecontain.Children.Add(infolabe);
         }
 
-        public void RetrunListView()
+        public static void RetrunListView()
         {
-            PageContain.Children.Clear();
-            ListItemView();
+            _pagecontain.Children.Clear();
         }
 
-        private async void OnSaveClick(object sender, EventArgs e, Item selecteditem)
+        private async static void OnSaveClick(object sender, EventArgs e, Item selecteditem)
         {
             if (PWChanging != null &&
                 (((PWChanging.InputedPW1).Equals(PWChanging.InputedPW2)) && 
@@ -192,7 +195,7 @@ namespace KeyManagment.Views
             ApplicationDatabasse = RealTimeDatabase.GetItemsAsync(true).Result.ToList();
         }
 
-        public void RefreshData ()
+        public static void RefreshData ()
         {
             ApplicationDatabasse = RealTimeDatabase.GetItemsAsync(true).Result.ToList();
         }
