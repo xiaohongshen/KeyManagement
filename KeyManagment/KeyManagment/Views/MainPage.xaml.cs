@@ -44,7 +44,6 @@ namespace KeyManagment.Views
         public static ToolbarItem ToolbarAddButton { get; set; }
         private static StackLayout _pagecontain;
         public static StackLayout PageContain { get => _pagecontain; private set => _pagecontain = value; }
-        public static EntryPW PWChanging { get; set; }
 
         public ViewCreator()
         {
@@ -88,31 +87,27 @@ namespace KeyManagment.Views
             _pagecontain.Children.Add(infolabel);
         }
 
-        private static void CreateItemView(Item item)
-        {
-            PageContain.Children.Clear();
-            Label label4name = new Label { Text = item.NameofApplication, HorizontalOptions = LayoutOptions.CenterAndExpand };
-            Label label4pw = new Label { Text = item.PW };
-            Button leftbutton = new Button { Text = "Edit" };
-            leftbutton.Clicked += (sender, args) => { OnEditClick(sender, args, item); };
-
-            Button rightbutton = new Button { Text = "GoBack" };
-            rightbutton.Clicked += (sender, args) => { RetrunListView(); };
-
-            Label infolabe = new Label { Text = "Now you can modify the name and password of the related application" };
-
-            _pagecontain.Children.Add(label4name);
-            _pagecontain.Children.Add(label4pw);
-            _pagecontain.Children.Add(leftbutton);
-            _pagecontain.Children.Add(rightbutton);
-            _pagecontain.Children.Add(infolabe);
-        }
-
         private static void OnListViewItemSelected(object sender, SelectedItemChangedEventArgs args)
         {
             if (args.SelectedItem != null)
             {
-                CreateItemView(args.SelectedItem as Item);
+                Item selecteditem = args.SelectedItem as Item;
+                PageContain.Children.Clear();
+                Label label4name = new Label { Text = selecteditem.NameofApplication, HorizontalOptions = LayoutOptions.CenterAndExpand };
+                Label label4pw = new Label { Text = selecteditem.PW };
+                Button leftbutton = new Button { Text = "Edit" };
+                leftbutton.Clicked += (sender, args) => { OnEditClick(sender, args, selecteditem); };
+
+                Button rightbutton = new Button { Text = "GoBack" };
+                rightbutton.Clicked += (sender, args) => { RetrunListView(); };
+
+                Label infolabe = new Label { Text = "Now you can modify the name and password of the related application" };
+
+                _pagecontain.Children.Add(label4name);
+                _pagecontain.Children.Add(label4pw);
+                _pagecontain.Children.Add(leftbutton);
+                _pagecontain.Children.Add(rightbutton);
+                _pagecontain.Children.Add(infolabe);
             }
         }
 
@@ -120,20 +115,20 @@ namespace KeyManagment.Views
         {
             PageContain.Children.Clear();
             Entry entry4name = new Entry { Text = selecteditme.NameofApplication, HorizontalOptions = LayoutOptions.CenterAndExpand };
-            entry4name.BindingContext = PWChanging = new EntryPW();
-            entry4name.SetBinding(Entry.TextProperty, "PWChanging.InputedName",
+            entry4name.BindingContext = DataOperation.PWChanging = new EntryPW();
+            entry4name.SetBinding(Entry.TextProperty, "DataOperation.PWChanging.InputedName",
                                  mode: BindingMode.OneWayToSource);
 
             Entry entry4pw1 = new Entry();
             entry4pw1.Text = "";
-            entry4pw1.BindingContext = PWChanging;
-            entry4pw1.SetBinding(Entry.TextProperty, "PWChanging.InputedPW1",
+            entry4pw1.BindingContext = DataOperation.PWChanging;
+            entry4pw1.SetBinding(Entry.TextProperty, "DataOperation.PWChanging.InputedPW1",
                                  mode: BindingMode.OneWayToSource);
 
             Entry entry4pw2 = new Entry();
             entry4pw2.Text = "";
-            entry4pw2.BindingContext = PWChanging;
-            entry4pw2.SetBinding(Entry.TextProperty, "PWChanging.InputedPW2",
+            entry4pw2.BindingContext = DataOperation.PWChanging;
+            entry4pw2.SetBinding(Entry.TextProperty, "DataOperation.PWChanging.InputedPW2",
                                  mode: BindingMode.OneWayToSource); 
 
             Button leftbutton = new Button { Text = "Save" };
@@ -154,45 +149,64 @@ namespace KeyManagment.Views
 
         public static void RetrunListView()
         {
-            _pagecontain.Children.Clear();
+            PageContain.Children.Clear();
+            CreateListItemView();
         }
 
         private async static void OnSaveClick(object sender, EventArgs e, Item selecteditem)
         {
-            if (PWChanging != null &&
-                (((PWChanging.InputedPW1).Equals(PWChanging.InputedPW2)) && 
-                PWChanging.InputedPW1 != null) &&
-                PWChanging.InputedName != null /*&& 
-                ToBeChangedApplication != null*/ &&
-                (!((PWChanging.InputedName).Equals("ThisApplication"))))
+            PageContain.Children.Clear();
+            Debug.Write("Invalid object. {0}", DataOperation.PWChanging.InputedName);
+            try
             {
-                Item tobechangeditem = new Item();
-                tobechangeditem.NameofApplication = PWChanging.InputedName;
-                tobechangeditem.PW = PWChanging.InputedPW1;//AESKEY.EncryptStringToBytes_Aes(Entry4PW1.Text);
-                tobechangeditem.Date = DateTime.UtcNow.ToString();
-                bool updateresult;
-                updateresult = await DataOperation.RealTimeDatabase.UpdateItemAsync(selecteditem, tobechangeditem);
-                if (updateresult)
+                if (DataOperation.PWChanging != null &&
+                    (((DataOperation.PWChanging.InputedPW1).Equals(DataOperation.PWChanging.InputedPW2)) &&
+                    DataOperation.PWChanging.InputedPW1 != null) &&
+                    DataOperation.PWChanging.InputedName != null /*&& 
+                ToBeChangedApplication != null*/ &&
+                    (!((DataOperation.PWChanging.InputedName).Equals("ThisApplication"))))
                 {
+                    Item tobechangeditem = new Item();
+                    tobechangeditem.NameofApplication = DataOperation.PWChanging.InputedName;
+                    tobechangeditem.PW = DataOperation.PWChanging.InputedPW1;//AESKEY.EncryptStringToBytes_Aes(Entry4PW1.Text);
+                    tobechangeditem.Date = DateTime.UtcNow.ToString();
+                    bool updateresult;
+                    updateresult = (await DataOperation.RealTimeDatabase.UpdateItemAsync(selecteditem, tobechangeditem));
+                    if (updateresult)
+                    {
+                        Debug.Write("Invalid object. {0}", DataOperation.PWChanging.InputedName);
+                    }
                     RetrunListView();
                 }
-            }
-            else
-            {
+                else
+                {
 
+                }
+            }
+            catch
+            {
+                Debug.Write("something is wrong hier");
             }
         }
     }
 
     internal class DataOperation
     {
-        public static FirebaseDataStore<Item> RealTimeDatabase { get; set; }
-        public static List<Item> ApplicationDatabasse { get; set; }
+        public static FirebaseDataStore<Item> RealTimeDatabase { get; private set; }
+
+        private static List<Item> _applicationdatabase;
+        public static List<Item> ApplicationDatabasse
+        {
+            get => _applicationdatabase;
+            set => RealTimeDatabase.GetItemsAsync(true).Result.ToList();
+        }
+
+        public static EntryPW PWChanging { get; set; } 
 
         public DataOperation()
         {
             RealTimeDatabase = new FirebaseDataStore<Item>("Notes");
-            ApplicationDatabasse = RealTimeDatabase.GetItemsAsync(true).Result.ToList();
+            _applicationdatabase = RealTimeDatabase.GetItemsAsync(true).Result.ToList();
         }
 
         public static void RefreshData ()
