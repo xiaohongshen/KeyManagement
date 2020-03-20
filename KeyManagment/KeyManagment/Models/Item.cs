@@ -5,7 +5,7 @@ namespace KeyManagment.Models
 {
     public class Item
     {
-        public string Id { get; set; }
+       // public string Id { get; set; }
 
         public string NameofApplication { get; set; }
 
