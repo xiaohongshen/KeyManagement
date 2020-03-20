@@ -104,15 +104,15 @@ namespace KeyManagment.Services
             }
         }
 
-        public async Task<List<T>> GetItemsAsync(bool forceRefresh = true)
+        public async Task<IEnumerable<T>> GetItemsAsync(bool forceRefresh = false)
         {
             try
             {
                 var firebaseObjects = await _query
                     .OnceAsync<T>();
 
-                return (firebaseObjects
-                    .Select(x => x.Object)).ToList() ;
+                return firebaseObjects
+                    .Select(x => x.Object) ;
             }
             catch(Exception ex)
             {

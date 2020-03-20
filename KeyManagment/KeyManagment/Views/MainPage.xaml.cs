@@ -199,7 +199,7 @@ namespace KeyManagment.Views
         
         public async static Task<List<Item>> GetData()
         {
-            return await RealTimeDatabase.GetItemsAsync();
+            return (await RealTimeDatabase.GetItemsAsync()).ToList();
         }
     }
 
