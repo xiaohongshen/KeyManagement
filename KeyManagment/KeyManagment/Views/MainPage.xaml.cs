@@ -31,14 +31,16 @@ namespace KeyManagment.Views
         {
             base.OnAppearing();
             ViewCreator.CreateListItemView();
-            this.ToolbarItems.Add(ViewCreator.AddToolbarButton());
+            Padding = 10;
+            Title = "KeyManagement";
+            this.ToolbarItems.Add(ViewCreator.AddItemToolBar("+"));
+            this.ToolbarItems.Add(ViewCreator.AddItemToolBar("logo"));
             Content = ViewCreator.PageContain;
         }
     }
 
     internal class ViewCreator
     {
-        //public static ToolbarItem ToolbarAddButton { get; set; }
         public static StackLayout PageContain { get ; private set ; }
 
         public ViewCreator()
@@ -46,22 +48,101 @@ namespace KeyManagment.Views
             PageContain = new StackLayout();
         }
 
-        public static ToolbarItem AddToolbarButton()
+        public static ToolbarItem AddItemToolBar(string element)
         {
-            return (new ToolbarItem
+            ToolbarItem toolbaritem ;
+            switch (element)
             {
-                Text = "++++++++",
-                Order = ToolbarItemOrder.Primary,
-                Priority = 0,
-                IconImageSource = ImageSource.FromFile("icon.png")
-            });
+                case "logo":
+                    toolbaritem = new ToolbarItem
+                    {
+                        Text = "Icon Item",
+                        Order = ToolbarItemOrder.Primary,
+                        Priority = 1,
+                        IconImageSource = ImageSource.FromFile("icon.png")
+                    };
+                    break;
+                default:
+                    toolbaritem = new ToolbarItem
+                    {
+                        Text = element,
+                        Order = ToolbarItemOrder.Primary,
+                        Priority = 0
+                    };
+                    toolbaritem.Clicked += OnNoteAddedClicked;
+                    break;
+            }
+            return toolbaritem;
         }
 
         private static void OnNoteAddedClicked(object sender, EventArgs e)
         {
-            
+            PageContain.Children.Clear();
+            Entry entry4name = new Entry { Placeholder = "pls given the name of application", PlaceholderColor = Color.Olive, HorizontalOptions = LayoutOptions.CenterAndExpand };
+           // DataOperation.PWChanging = (DataOperation.PWChanging != null ?  null : DataOperation.PWChanging);
 
-        }   
+            entry4name.BindingContext = DataOperation.PWChanging = new EntryPW();
+            entry4name.SetBinding(Entry.TextProperty, "DataOperation.PWChanging.InputedName",
+                                 mode: BindingMode.OneWayToSource);
+
+            Entry entry4pw1 = new Entry();
+            entry4pw1.Text = "";
+            entry4pw1.BindingContext = DataOperation.PWChanging;
+            entry4pw1.SetBinding(Entry.TextProperty, "DataOperation.PWChanging.InputedPW1",
+                                 mode: BindingMode.OneWayToSource);
+
+            Entry entry4pw2 = new Entry();
+            entry4pw2.Text = "";
+            entry4pw2.BindingContext = DataOperation.PWChanging;
+            entry4pw2.SetBinding(Entry.TextProperty, "DataOperation.PWChanging.InputedPW2",
+                                 mode: BindingMode.OneWayToSource);
+
+            Button leftbutton = new Button { Text = "Save" };
+            leftbutton.Clicked += OnAddSaveClick;
+
+            PageContain.Children.Add(entry4name);
+            PageContain.Children.Add(entry4pw1);
+            PageContain.Children.Add(entry4pw2);
+            PageContain.Children.Add(leftbutton);
+            //PageContain.Children.Add(rightbutton);
+            //PageContain.Children.Add(infolabe);
+
+
+        }
+
+        private async static void OnAddSaveClick(object sender, EventArgs e)
+        {
+            PageContain.Children.Clear();
+            try
+            {
+                if (DataOperation.PWChanging != null &&
+                    (((DataOperation.PWChanging.InputedPW1).Equals(DataOperation.PWChanging.InputedPW2)) &&
+                    DataOperation.PWChanging.InputedPW1 != null) &&
+                    DataOperation.PWChanging.InputedName != null /*&& 
+                ToBeChangedApplication != null*/ &&
+                    (!((DataOperation.PWChanging.InputedName).Equals("ThisApplication"))))
+                {
+                    Item tobechangeditem = new Item();
+                    tobechangeditem.NameofApplication = DataOperation.PWChanging.InputedName;
+                    tobechangeditem.PW = DataOperation.PWChanging.InputedPW1;//AESKEY.EncryptStringToBytes_Aes(Entry4PW1.Text);
+                    tobechangeditem.Date = DateTime.UtcNow.ToString();
+                    bool updateresult;
+                    updateresult = (await DataOperation.RealTimeDatabase.AddItemAsync(tobechangeditem));
+                    if (updateresult)
+                    {
+                        RetrunListView();
+                    }
+
+                }
+                else
+                {
+
+                }
+            }
+            catch
+            {
+            }
+        }
 
         public async static void CreateListItemView()
         {
@@ -143,7 +224,7 @@ namespace KeyManagment.Views
             PageContain.Children.Add(infolabe);
         }
 
-        public static void RetrunListView()
+        private static void RetrunListView()
         {
             PageContain.Children.Clear();        
             CreateListItemView();
@@ -188,13 +269,11 @@ namespace KeyManagment.Views
     {
         public static FirebaseDataStore<Item> RealTimeDatabase { get; private set; }
 
-        //public static List<Item> ApplicationDatabase { get ;  set; }
         public static EntryPW PWChanging { get; set; } 
 
         public DataOperation()
         {
             RealTimeDatabase = new FirebaseDataStore<Item>("Notes");
-            //ApplicationDatabase = RealTimeDatabase.GetItemsAsync().Result;
         }
         
         public async static Task<List<Item>> GetData()
