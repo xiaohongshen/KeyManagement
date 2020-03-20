@@ -19,15 +19,12 @@ namespace KeyManagment.Views
     //[DesignTimeVisible(false)]
     public partial class MainPage : ContentPage
     {
-        internal static ViewCreator MainPageElement { get ; set ; }
-        internal static DataOperation DataOperation { get ; set; }
-
 
         public MainPage()
         {
-            InitializeComponent();            
-            MainPageElement = new ViewCreator();
-            DataOperation = new DataOperation();
+            InitializeComponent();
+            _ = new ViewCreator();
+            _ = new DataOperation();
         }
 
         protected override void OnAppearing()
@@ -41,13 +38,12 @@ namespace KeyManagment.Views
 
     internal class ViewCreator
     {
-        public static ToolbarItem ToolbarAddButton { get; set; }
-        private static StackLayout _pagecontain;
-        public static StackLayout PageContain { get => _pagecontain; private set => _pagecontain = value; }
+        //public static ToolbarItem ToolbarAddButton { get; set; }
+        public static StackLayout PageContain { get ; private set ; }
 
         public ViewCreator()
         {
-            _pagecontain = new StackLayout();
+            PageContain = new StackLayout();
         }
 
         public static ToolbarItem AddToolbarButton()
@@ -67,7 +63,7 @@ namespace KeyManagment.Views
 
         }   
 
-        public static void CreateListItemView()
+        public async static void CreateListItemView()
         {
             PageContain.Children.Clear();
             ListView itemlist = new ListView
@@ -81,10 +77,10 @@ namespace KeyManagment.Views
                 })
             };
             itemlist.ItemSelected += OnListViewItemSelected;
-            itemlist.ItemsSource = DataOperation.ApplicationDatabasse;
+            itemlist.ItemsSource = await DataOperation.GetData();
             Label infolabel = new Label { Text = "schoen dich zu sehen" };
-            _pagecontain.Children.Add(itemlist);
-            _pagecontain.Children.Add(infolabel);
+            PageContain.Children.Add(itemlist);
+            PageContain.Children.Add(infolabel);
         }
 
         private static void OnListViewItemSelected(object sender, SelectedItemChangedEventArgs args)
@@ -103,11 +99,11 @@ namespace KeyManagment.Views
 
                 Label infolabe = new Label { Text = "Now you can modify the name and password of the related application" };
 
-                _pagecontain.Children.Add(label4name);
-                _pagecontain.Children.Add(label4pw);
-                _pagecontain.Children.Add(leftbutton);
-                _pagecontain.Children.Add(rightbutton);
-                _pagecontain.Children.Add(infolabe);
+                PageContain.Children.Add(label4name);
+                PageContain.Children.Add(label4pw);
+                PageContain.Children.Add(leftbutton);
+                PageContain.Children.Add(rightbutton);
+                PageContain.Children.Add(infolabe);
             }
         }
 
@@ -139,24 +135,23 @@ namespace KeyManagment.Views
 
             Label infolabe = new Label { Text = "Now you can modify the name and password of the related application" };
 
-            _pagecontain.Children.Add(entry4name);
-            _pagecontain.Children.Add(entry4pw1);
-            _pagecontain.Children.Add(entry4pw2);
-            _pagecontain.Children.Add(leftbutton);
-            _pagecontain.Children.Add(rightbutton);
-            _pagecontain.Children.Add(infolabe);
+            PageContain.Children.Add(entry4name);
+            PageContain.Children.Add(entry4pw1);
+            PageContain.Children.Add(entry4pw2);
+            PageContain.Children.Add(leftbutton);
+            PageContain.Children.Add(rightbutton);
+            PageContain.Children.Add(infolabe);
         }
 
         public static void RetrunListView()
         {
-            PageContain.Children.Clear();
+            PageContain.Children.Clear();        
             CreateListItemView();
         }
 
         private async static void OnSaveClick(object sender, EventArgs e, Item selecteditem)
         {
             PageContain.Children.Clear();
-            Debug.Write("Invalid object. {0}", DataOperation.PWChanging.InputedName);
             try
             {
                 if (DataOperation.PWChanging != null &&
@@ -174,9 +169,9 @@ namespace KeyManagment.Views
                     updateresult = (await DataOperation.RealTimeDatabase.UpdateItemAsync(selecteditem, tobechangeditem));
                     if (updateresult)
                     {
-                        Debug.Write("Invalid object. {0}", DataOperation.PWChanging.InputedName);
+                        RetrunListView();
                     }
-                    RetrunListView();
+                        
                 }
                 else
                 {
@@ -185,7 +180,6 @@ namespace KeyManagment.Views
             }
             catch
             {
-                Debug.Write("something is wrong hier");
             }
         }
     }
@@ -194,24 +188,18 @@ namespace KeyManagment.Views
     {
         public static FirebaseDataStore<Item> RealTimeDatabase { get; private set; }
 
-        private static List<Item> _applicationdatabase;
-        public static List<Item> ApplicationDatabasse
-        {
-            get => _applicationdatabase;
-            set => RealTimeDatabase.GetItemsAsync(true).Result.ToList();
-        }
-
+        //public static List<Item> ApplicationDatabase { get ;  set; }
         public static EntryPW PWChanging { get; set; } 
 
         public DataOperation()
         {
             RealTimeDatabase = new FirebaseDataStore<Item>("Notes");
-            _applicationdatabase = RealTimeDatabase.GetItemsAsync(true).Result.ToList();
+            //ApplicationDatabase = RealTimeDatabase.GetItemsAsync().Result;
         }
-
-        public static void RefreshData ()
+        
+        public async static Task<List<Item>> GetData()
         {
-            ApplicationDatabasse = RealTimeDatabase.GetItemsAsync(true).Result.ToList();
+            return await RealTimeDatabase.GetItemsAsync();
         }
     }
 
