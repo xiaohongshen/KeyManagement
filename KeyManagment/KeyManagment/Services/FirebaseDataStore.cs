@@ -3,6 +3,7 @@ using Firebase.Database.Offline;
 using Firebase.Database.Query;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -62,6 +63,22 @@ namespace KeyManagment.Services
             return true;
         }
 
+        public async Task<bool> CreatAPPAccount(T apppw)
+        {
+            try
+            {
+                await _query
+                    .Child("ThisApplication")
+                  .PutAsync(apppw);
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
         public async Task<bool> DeleteItemAsync(string id)
         {
             try
@@ -97,6 +114,20 @@ namespace KeyManagment.Services
             try
             {
                 return await _query.Child("Notes").OnceSingleAsync<T>();
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
+        }
+
+        public async Task<T> GetAppPW()
+        {
+            try
+            {
+                Debug.Write("getapppw ");
+                var returvalue = await _query.Child("ThisApplication").OnceSingleAsync<T>();
+                return returvalue;
             }
             catch (Exception ex)
             {

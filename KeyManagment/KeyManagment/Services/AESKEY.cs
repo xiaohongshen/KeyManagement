@@ -15,12 +15,12 @@ namespace KeyManagment.Services
                                                      40, 41, 73, 195,
                                                      132, 72, 82, 35};
 
-        //want to define Aes_Key as static readonly, can't get it
-        private static byte[] Aes_GenKey = null;
+        //want to define Aes_Key as static readonly, can't get it        
+        private static byte[] Aes_GenKey { get; set; }
 
         public static void Set_AesKey(string aeskey)
         {
-            byte[] tmpkey = new byte[32];
+            byte[] tmpkey = new byte[32];            
 
             byte[] tmpbyte = System.Text.Encoding.UTF8.GetBytes(aeskey);
             for (int i = 0; i < aeskey.Length; i++)
@@ -37,32 +37,39 @@ namespace KeyManagment.Services
 
         public static string EncryptStringToBytes_Aes(string entrycode)
         {
-            byte[] encrypted;
-            using (Aes aesAlg = Aes.Create())
+            try
             {
-
-                aesAlg.Key = Aes_GenKey;
-                aesAlg.IV = Aes_InitKey;
-
-                // Create an encryptor to perform the stream transform.
-                ICryptoTransform encryptor = aesAlg.CreateEncryptor(aesAlg.Key, aesAlg.IV);
-
-                // Create the streams used for encryption.
-                using (MemoryStream msEncrypt = new MemoryStream())
+                byte[] encrypted;
+                using (Aes aesAlg = Aes.Create())
                 {
-                    using (CryptoStream csEncrypt = new CryptoStream(msEncrypt, encryptor, CryptoStreamMode.Write))
+
+                    aesAlg.Key = Aes_GenKey;
+                    aesAlg.IV = Aes_InitKey;
+
+                    // Create an encryptor to perform the stream transform.
+                    ICryptoTransform encryptor = aesAlg.CreateEncryptor(aesAlg.Key, aesAlg.IV);
+
+                    // Create the streams used for encryption.
+                    using (MemoryStream msEncrypt = new MemoryStream())
                     {
-                        using (StreamWriter swEncrypt = new StreamWriter(csEncrypt))
+                        using (CryptoStream csEncrypt = new CryptoStream(msEncrypt, encryptor, CryptoStreamMode.Write))
                         {
-                            //Write all data to the stream.
-                            swEncrypt.Write(entrycode);
+                            using (StreamWriter swEncrypt = new StreamWriter(csEncrypt))
+                            {
+                                //Write all data to the stream.
+                                swEncrypt.Write(entrycode);
+                            }
+                            encrypted = msEncrypt.ToArray();
                         }
-                        encrypted = msEncrypt.ToArray();
                     }
                 }
+                // Return the encrypted string from the memory stream.            
+                return System.Convert.ToBase64String(encrypted);
             }
-            // Return the encrypted string from the memory stream.            
-            return System.Convert.ToBase64String(encrypted);
+            catch 
+            {
+                return "xx pw invalid xxxxx"; 
+            }
         }
 
         public static string DecryptStringFromBytes_Aes(string cipherText)
@@ -71,32 +78,36 @@ namespace KeyManagment.Services
             string plaintext;
 
             decryptbytearray = System.Convert.FromBase64String(cipherText);
-
-            // Create an Aes object
-            // with the specified key and IV.
-            using (Aes aesAlg = Aes.Create())
+            try
             {
-                aesAlg.Key = Aes_GenKey;
-                aesAlg.IV = Aes_InitKey;
-
-                // Create a decryptor to perform the stream transform.
-                ICryptoTransform decryptor = aesAlg.CreateDecryptor(aesAlg.Key, aesAlg.IV);
-
-                // Create the streams used for decryption.
-                using (MemoryStream msDecrypt = new MemoryStream(decryptbytearray))
+                using (Aes aesAlg = Aes.Create())
                 {
-                    using (CryptoStream csDecrypt = new CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Read))
-                    {
-                        using (StreamReader srDecrypt = new StreamReader(csDecrypt))
-                        {
+                    aesAlg.Key = Aes_GenKey;
+                    aesAlg.IV = Aes_InitKey;
 
-                            // Read the decrypted bytes from the decrypting stream
-                            // and place them in a string.
-                            plaintext = srDecrypt.ReadToEnd();
+                    // Create a decryptor to perform the stream transform.
+                    ICryptoTransform decryptor = aesAlg.CreateDecryptor(aesAlg.Key, aesAlg.IV);
+
+                    // Create the streams used for decryption.
+                    using (MemoryStream msDecrypt = new MemoryStream(decryptbytearray))
+                    {
+                        using (CryptoStream csDecrypt = new CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Read))
+                        {
+                            using (StreamReader srDecrypt = new StreamReader(csDecrypt))
+                            {
+
+                                // Read the decrypted bytes from the decrypting stream
+                                // and place them in a string.
+                                plaintext = srDecrypt.ReadToEnd();
+                            }
                         }
                     }
-                }
 
+                }
+            }
+            catch
+            {
+                plaintext = "xx pw invalid xxxxx";
             }
 
             return plaintext;
