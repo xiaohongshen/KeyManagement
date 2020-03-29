@@ -25,17 +25,16 @@ namespace KeyManagment.Views
             InitializeComponent();
             _ = new ViewCreator();
             _ = new DataOperation();
-            //DataOperation.Init_DataOperation();
         }
 
         protected override void OnAppearing()
         {
-            base.OnAppearing();
-            ViewCreator.LoginPage();
+            base.OnAppearing();            
             Padding = 10;
             Title = "KeyManagement";
             this.ToolbarItems.Add(ViewCreator.AddItemToolBar("+"));
             this.ToolbarItems.Add(ViewCreator.AddItemToolBar("logo"));
+            ViewCreator.LoginPage();
             Content = ViewCreator.PageContain;
         }
     }
@@ -125,7 +124,7 @@ namespace KeyManagment.Views
                 {
                     Item tobechangeditem = new Item();
                     tobechangeditem.NameofApplication = DataOperation.PWChanging.InputedName;
-                    tobechangeditem.PW = DataOperation.PWChanging.InputedPW1;//AESKEY.EncryptStringToBytes_Aes(Entry4PW1.Text);
+                    tobechangeditem.PW = AESKEY.EncryptStringToBytes_Aes(DataOperation.PWChanging.InputedPW1);
                     tobechangeditem.Date = DateTime.UtcNow.ToString();
                     bool updateresult;
                     updateresult = (await DataOperation.RealTimeDatabase.AddItemAsync(tobechangeditem));
@@ -245,7 +244,7 @@ namespace KeyManagment.Views
                 {
                     Item tobechangeditem = new Item();
                     tobechangeditem.NameofApplication = DataOperation.PWChanging.InputedName;
-                    tobechangeditem.PW = DataOperation.PWChanging.InputedPW1;//AESKEY.EncryptStringToBytes_Aes(Entry4PW1.Text);
+                    tobechangeditem.PW = AESKEY.EncryptStringToBytes_Aes(DataOperation.PWChanging.InputedPW1);
                     tobechangeditem.Date = DateTime.UtcNow.ToString();
                     bool updateresult;
                     updateresult = (await DataOperation.RealTimeDatabase.UpdateItemAsync(selecteditem, tobechangeditem));
@@ -333,6 +332,7 @@ namespace KeyManagment.Views
 
             if (encryloginpw.Equals(DataOperation.AppPW) && DataOperation.AppPW != null)
             {
+                DataOperation.LogedIN = true;
                 CreateListItemView();
             }            
             else
@@ -361,6 +361,7 @@ namespace KeyManagment.Views
                     appacount.Date = DateTime.UtcNow.ToString();
                     bool updateresult;
                     updateresult = (await DataOperation.RealTimeDatabase.CreatAPPAccount(appacount));
+                    DataOperation.LogedIN = true;
                     CreateListItemView();
                 }
                 else

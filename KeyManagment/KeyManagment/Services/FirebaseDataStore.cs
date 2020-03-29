@@ -47,7 +47,6 @@ namespace KeyManagment.Services
         {
             try
             {
-                // await _query.Child("Notes").PutAsync(item);
                 var toUpdatePerson = (await _query
                     .OnceAsync<T>()).Where(a => a.Object.Equals(tobechangeditem)).FirstOrDefault();
 
@@ -125,7 +124,6 @@ namespace KeyManagment.Services
         {
             try
             {
-                Debug.Write("getapppw ");
                 var returvalue = await _query.Child("ThisApplication").OnceSingleAsync<T>();
                 return returvalue;
             }
@@ -139,11 +137,11 @@ namespace KeyManagment.Services
         {
             try
             {
-                var firebaseObjects = await _query
-                    .OnceAsync<T>();
+                var firebaseObjects = (await _query
+                    .OnceAsync<T>()).Where(x => (x.Key != "ThisApplication"));
 
-                return firebaseObjects
-                    .Select(x => x.Object) ;
+                return (firebaseObjects
+                    .Select(x => x.Object));
             }
             catch(Exception ex)
             {

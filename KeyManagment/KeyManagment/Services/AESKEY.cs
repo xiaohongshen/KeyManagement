@@ -76,10 +76,9 @@ namespace KeyManagment.Services
         {
             byte[] decryptbytearray;
             string plaintext;
-
-            decryptbytearray = System.Convert.FromBase64String(cipherText);
             try
             {
+                decryptbytearray = System.Convert.FromBase64String(cipherText);
                 using (Aes aesAlg = Aes.Create())
                 {
                     aesAlg.Key = Aes_GenKey;
