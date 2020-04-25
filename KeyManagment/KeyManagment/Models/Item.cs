@@ -9,6 +9,8 @@ namespace KeyManagment.Models
 
         public string NameofApplication { get; set; }
 
+        //public string UserName { get; set; }
+
         public string PW { get; set; }
 
         public string Date { get; set; }

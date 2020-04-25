@@ -129,6 +129,7 @@ namespace KeyManagment.Services
             }
             catch (Exception ex)
             {
+                Debug.WriteLine("clement hier? {0}", ex);
                 return null;
             }
         }
