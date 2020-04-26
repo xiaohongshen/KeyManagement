@@ -106,7 +106,7 @@ namespace KeyManagment.Services
             }
             catch
             {
-                plaintext = "xx pw invalid xxxxx";
+                plaintext = "xxxxx code invalid xxxxx";
             }
 
             return plaintext;

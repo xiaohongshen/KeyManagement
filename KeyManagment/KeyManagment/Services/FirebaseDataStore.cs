@@ -1,6 +1,7 @@
 ﻿using Firebase.Database;
 using Firebase.Database.Offline;
 using Firebase.Database.Query;
+using KeyManagment.Models;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -9,8 +10,7 @@ using System.Threading.Tasks;
 
 namespace KeyManagment.Services
 {
-    public class FirebaseDataStore<T> : IDataStore<T>
-        where T : class
+    public class FirebaseDataStore
     {
         private const string BaseUrl = "https://keymanagement-7be4d.firebaseio.com";
 
@@ -28,7 +28,7 @@ namespace KeyManagment.Services
             _query = new FirebaseClient(BaseUrl/*, options*/).Child(path);
         }
 
-        public async Task<bool> AddItemAsync(T item)
+        public async Task<bool> AddItemAsync(Item item)
         {
             try
             {
@@ -43,16 +43,16 @@ namespace KeyManagment.Services
             return true;
         }
 
-        public async Task<bool> UpdateItemAsync(T tobechangeditem, T updatedata)
+        public async Task<bool> UpdateItemAsync(EntryData updatedata)
         {
             try
             {
                 var toUpdatePerson = (await _query
-                    .OnceAsync<T>()).Where(a => a.Object.Equals(tobechangeditem)).FirstOrDefault();
+                    .OnceAsync<Item>()).Where(a => (a.Key == updatedata.EntryId)).FirstOrDefault();
 
                 await _query
-                    .Child(toUpdatePerson.Key)
-                  .PutAsync(updatedata);
+                    .Child(updatedata.EntryId)
+                  .PutAsync(updatedata.EntryItem);
             }
             catch(Exception ex)
             {
@@ -62,7 +62,7 @@ namespace KeyManagment.Services
             return true;
         }
 
-        public async Task<bool> CreatAPPAccount(T apppw)
+        public async Task<bool> CreatAPPAccount(Item apppw)
         {
             try
             {
@@ -94,13 +94,13 @@ namespace KeyManagment.Services
             return true;
         }
 
-        public async Task<T> GetItemAsync(string id)
+        public async Task<Item> GetItemAsync(string id)
         {
             try
             {
                 return await _query
                     .Child(id)
-                    .OnceSingleAsync<T>();
+                    .OnceSingleAsync<Item>();
             }
             catch(Exception ex)
             {
@@ -108,24 +108,11 @@ namespace KeyManagment.Services
             }
         }
 
-        public async Task<T> GetItemNode()
+        public async Task<Item> GetAppPW()
         {
             try
             {
-                return await _query.Child("Notes").OnceSingleAsync<T>();
-            }
-            catch (Exception ex)
-            {
-                return null;
-            }
-        }
-
-        public async Task<T> GetAppPW()
-        {
-            try
-            {
-                var returvalue = await _query.Child("ThisApplication").OnceSingleAsync<T>();
-                return returvalue;
+                return (await _query.Child("ThisApplication").OnceSingleAsync<Item>());
             }
             catch (Exception ex)
             {
@@ -134,15 +121,15 @@ namespace KeyManagment.Services
             }
         }
 
-        public async Task<IEnumerable<T>> GetItemsAsync(bool forceRefresh = false)
+        public async Task<IEnumerable<EntryData>> GetItemsAsync(bool forceRefresh = false)
         {
             try
             {
                 var firebaseObjects = (await _query
-                    .OnceAsync<T>()).Where(x => (x.Key != "ThisApplication"));
+                    .OnceAsync<Item>()).Where(x => (x.Key != "ThisApplication"));
 
                 return (firebaseObjects
-                    .Select(x => x.Object));
+                    .Select(x => new EntryData { EntryId = x.Key, EntryItem = x.Object}));
             }
             catch(Exception ex)
             {

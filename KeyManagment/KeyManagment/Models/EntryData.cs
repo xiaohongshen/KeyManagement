@@ -1,15 +1,26 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Threading.Tasks;
 
 namespace KeyManagment.Models
 {
-    public class Item
+    public class EntryData 
     {
-       // public string Id { get; set; }
+        public string EntryId { get; set; }
+        public Item EntryItem { get; set; }
+        public EntryData()
+        {
+            EntryItem = new Item();
+        }
+    }
+
+    public class Item 
+    {
+        private string pw;
 
         public string NameofApplication { get; set; }
 
-        //public string UserName { get; set; }
+        public string UserName { get; set; }
 
         public string PW { get; set; }
 

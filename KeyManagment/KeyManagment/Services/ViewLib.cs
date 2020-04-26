@@ -21,7 +21,7 @@ namespace KeyManagment.Services
                 {
                     // Create views with bindings for displaying each property.
                     Label namefofapplication = new Label();
-                    namefofapplication.SetBinding(Label.TextProperty, "NameofApplication");
+                    namefofapplication.SetBinding(Label.TextProperty, "EntryItem.NameofApplication");
 
                     //Label password = new Label();
                     //password.SetBinding(Label.TextProperty, "PW");
@@ -74,7 +74,7 @@ namespace KeyManagment.Services
         public Button rightbutton { get; set; }
 
 
-        public EntryView(string nameofapplication, string pwofapplication)
+        public EntryView()
         {
             leftbutton = new Button { Text = "Edit",  HorizontalOptions = LayoutOptions.Center};
             rightbutton = new Button { Text = "GoBack", HorizontalOptions = LayoutOptions.Center };
@@ -95,6 +95,22 @@ namespace KeyManagment.Services
             grid.Children.Add(leftbutton, 0, 0);
             grid.Children.Add(rightbutton, 1, 0);
 
+            Label label4name = new Label
+            {
+                FontSize = Device.GetNamedSize(NamedSize.Medium, typeof(Label)),
+                FontAttributes = FontAttributes.Bold
+            };
+            label4name.SetBinding(Label.TextProperty, "InputedName", mode: BindingMode.TwoWay);
+            label4name.BindingContext = DataOperation.WorkingItem;
+
+            Label label4username = new Label();
+            label4username.SetBinding(Label.TextProperty, "InputedUserName", mode: BindingMode.TwoWay);
+            label4username.BindingContext = DataOperation.WorkingItem;
+
+            Label label4pw = new Label();
+            label4pw.SetBinding(Label.TextProperty, "InputedPW1", mode: BindingMode.TwoWay);
+            label4pw.BindingContext = DataOperation.WorkingItem;
+
             Frame framlabel4name = new Frame
             {
                 BorderColor = Color.Orange,
@@ -105,12 +121,8 @@ namespace KeyManagment.Services
                 {
                     Children =
                     {
-                        new Label
-                        {
-                            Text = nameofapplication,
-                            FontSize = Device.GetNamedSize(NamedSize.Medium, typeof(Label)),
-                            FontAttributes = FontAttributes.Bold
-                        },
+                        label4name,
+
 
                         new BoxView
                         {
@@ -119,10 +131,8 @@ namespace KeyManagment.Services
                             HorizontalOptions = LayoutOptions.Fill
                         },
 
-                        new Label
-                        {
-                            Text = pwofapplication
-                        }
+                        label4username,
+                        label4pw,
                     }      
                 }
             };
@@ -146,9 +156,7 @@ namespace KeyManagment.Services
         public Button midbutton { get; set; }
         public Button rightbutton { get; set; }
 
-        public Entry entry4name { get; set; }
-
-        public EditView(string nameofapplication)
+        public EditView()
         {
             leftbutton = new Button { Text = "Save", HorizontalOptions = LayoutOptions.Center };
             rightbutton = new Button { Text = "GoBack", HorizontalOptions = LayoutOptions.Center };
@@ -173,29 +181,25 @@ namespace KeyManagment.Services
             grid.Children.Add(midbutton, 1, 0);
             grid.Children.Add(rightbutton, 2, 0);
 
-            entry4name = new Entry
+            Entry entry4name = new Entry
             {
                 FontSize = Device.GetNamedSize(NamedSize.Medium, typeof(Label)),
                 FontAttributes = FontAttributes.Bold
             };
             entry4name.SetBinding(Entry.TextProperty, "InputedName", mode: BindingMode.TwoWay);
-            entry4name.BindingContext = DataOperation.PWChanging;
-            entry4name.Text = nameofapplication;
+            entry4name.BindingContext = DataOperation.WorkingItem;
 
+            Entry entry4username = new Entry();
+            entry4username.SetBinding(Entry.TextProperty, "InputedUserName", mode: BindingMode.TwoWay);
+            entry4username.BindingContext = DataOperation.WorkingItem;
 
-            Entry entry4pw1 = new Entry()
-            {
-                Placeholder = "Pls give the new password"
-            };
+            Entry entry4pw1 = new Entry();
             entry4pw1.SetBinding(Entry.TextProperty, "InputedPW1", mode: BindingMode.TwoWay);
-            entry4pw1.BindingContext = DataOperation.PWChanging;
+            entry4pw1.BindingContext = DataOperation.WorkingItem;
 
-            Entry entry4pw2 = new Entry
-            {
-                Placeholder = "Pls give the new password again"
-            };
+            Entry entry4pw2 = new Entry();
             entry4pw2.SetBinding(Entry.TextProperty, "InputedPW2", mode: BindingMode.TwoWay);
-            entry4pw2.BindingContext = DataOperation.PWChanging;
+            entry4pw2.BindingContext = DataOperation.WorkingItem;
 
             Frame framlabel4name = new Frame
             {
@@ -208,6 +212,8 @@ namespace KeyManagment.Services
                     Children =
                     {
                         entry4name,
+
+                        entry4username,
 
                         entry4pw1,
 
@@ -253,7 +259,7 @@ namespace KeyManagment.Services
                 Placeholder = "pls give your key",
             };
             entry4key.SetBinding(Entry.TextProperty, "InputedPW1", mode: BindingMode.OneWayToSource);
-            entry4key.BindingContext = DataOperation.PWChanging;
+            entry4key.BindingContext = DataOperation.WorkingItem;
 
             Grid grid = new Grid
             {
@@ -324,7 +330,7 @@ namespace KeyManagment.Services
             keygenbutton = new Button { Text = "key gen", HorizontalOptions = LayoutOptions.Center };
             //keygenbutton.Clicked += ViewCreator.KeyGenEvent;
 
-            DataOperation.PWChanging.InputedName = "ThisApplication";
+            DataOperation.WorkingItem.InputedName = "ThisApplication";
 
             Grid grid = new Grid
             {
@@ -348,7 +354,7 @@ namespace KeyManagment.Services
                 Placeholder = "pls give the key",
             };
 
-            entry4pw1.BindingContext = DataOperation.PWChanging;
+            entry4pw1.BindingContext = DataOperation.WorkingItem;
             entry4pw1.SetBinding(Entry.TextProperty, "InputedPW1", mode: BindingMode.TwoWay);
 
             Entry entry4pw2 = new Entry
@@ -358,9 +364,9 @@ namespace KeyManagment.Services
                 //FontAttributes = FontAttributes.Bold
             };
             entry4pw2.SetBinding(Entry.TextProperty, "InputedPW2", mode: BindingMode.TwoWay);
-            entry4pw2.BindingContext = DataOperation.PWChanging;
+            entry4pw2.BindingContext = DataOperation.WorkingItem;
 
-            DataOperation.PWChanging.InputedName = "ThisApplication";
+            DataOperation.WorkingItem.InputedName = "ThisApplication";
 
             Frame framlabel4name = new Frame
             {
@@ -400,7 +406,7 @@ namespace KeyManagment.Services
             viewcontain.Children.Add(grid);
             viewcontain.Children.Add(new Label
                                {
-                                   Text = "Now you can modify the name and password of the related application"
+                                   Text = "pls reg your general key for this application"
                                });
         }
     }
@@ -472,22 +478,28 @@ namespace KeyManagment.Services
                 FontAttributes = FontAttributes.Bold
             };
             entry4name.SetBinding(Entry.TextProperty, "InputedName", mode: BindingMode.TwoWay);
-            entry4name.BindingContext = DataOperation.PWChanging;
+            entry4name.BindingContext = DataOperation.WorkingItem;
 
+            Entry entry4username = new Entry
+            {
+                Placeholder = "pls give the username",
+            };
+            entry4username.SetBinding(Entry.TextProperty, "InputedUserName", mode: BindingMode.TwoWay);
+            entry4username.BindingContext = DataOperation.WorkingItem;
 
             Entry entry4pw1 = new Entry
             {
                 Placeholder = "pls give new password "
             };
             entry4pw1.SetBinding(Entry.TextProperty, "InputedPW1", mode: BindingMode.TwoWay);
-            entry4pw1.BindingContext = DataOperation.PWChanging;
+            entry4pw1.BindingContext = DataOperation.WorkingItem;
 
             Entry entry4pw2 = new Entry
             {
                 Placeholder = "pls give new password again"
             };
             entry4pw2.SetBinding(Entry.TextProperty, "InputedPW2", mode: BindingMode.TwoWay);
-            entry4pw2.BindingContext = DataOperation.PWChanging;
+            entry4pw2.BindingContext = DataOperation.WorkingItem;
 
             Grid grid = new Grid
             {
@@ -526,6 +538,7 @@ namespace KeyManagment.Services
                             HeightRequest = 2,
                             HorizontalOptions = LayoutOptions.Fill
                         },
+                        entry4username,
 
                         entry4pw1,
 
@@ -547,5 +560,33 @@ namespace KeyManagment.Services
         }
     }
 
-}
+    class UpdateFailedView
+    {
+        public StackLayout viewcontain { get; set; }
+        public Button gobackbutton { get; set; }
 
+        public UpdateFailedView()
+        {
+            Label warning = new Label
+            {
+                Text = "Entry Update Failed \n \n Pls try it late again \n \n",
+                TextColor = Color.FromHex("#000080"),
+                FontSize = Device.GetNamedSize(NamedSize.Medium, typeof(Label)),
+                FontAttributes = FontAttributes.Bold,
+                HorizontalTextAlignment = TextAlignment.Center
+            };
+
+            gobackbutton = new Button 
+            { 
+                Text = "GoBack", 
+                HorizontalOptions = LayoutOptions.Center,
+                WidthRequest = 80,
+                CornerRadius = 20
+            };
+            viewcontain = new StackLayout();
+            viewcontain.Children.Add(warning);
+            viewcontain.Children.Add(gobackbutton);
+        }
+       
+    }
+}
